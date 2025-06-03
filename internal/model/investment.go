@@ -14,9 +14,9 @@ type Investment struct {
 
 // InvestmentCreate represents the data needed to create a new investment
 type InvestmentCreate struct {
-	ClientID int     `json:"client_id" validate:"required"`
-	FundID   int     `json:"fund_id" validate:"required"`
-	Amount   float64 `json:"amount" validate:"required,gt=0"`
+	ClientID int     `json:"client_id"`
+	FundID   int     `json:"fund_id"`
+	Amount   float64 `json:"amount"`
 }
 
 // InvestmentResponse represents the investment data that will be sent in API responses

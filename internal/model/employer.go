@@ -8,7 +8,7 @@ type Employer struct {
 
 // EmployerCreate represents the data needed to create a new employer
 type EmployerCreate struct {
-	Name string `json:"name" validate:"required"`
+	Name string `json:"name"`
 }
 
 // EmployerResponse represents the employer data that will be sent in API responses

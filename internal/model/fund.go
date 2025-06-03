@@ -8,7 +8,7 @@ type Fund struct {
 
 // FundCreate represents the data needed to create a new fund
 type FundCreate struct {
-	Name string `json:"name" validate:"required"`
+	Name string `json:"name"`
 }
 
 // FundResponse represents the fund data that will be sent in API responses
