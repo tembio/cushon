@@ -9,9 +9,6 @@ import (
 type Fund interface {
 	Create(fund *model.Fund) error
 	Get(id int) (*model.Fund, error)
-	// Out of scope of the assignment
-	// Update(fund *model.Fund) error
-	// Delete(id int) error
 }
 
 // defaultFundService is a concrete implementation of FundService

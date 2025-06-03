@@ -2,7 +2,6 @@ package repository
 
 // APIKeyRepository defines the interface for API key operations
 type APIKeyRepository interface {
-	// ValidateKey checks if an API key is valid
 	ValidateKey(key string) bool
 }
 

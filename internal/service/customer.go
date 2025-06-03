@@ -8,8 +8,6 @@ import (
 // Customer defines the interface for customer operations
 type Customer interface {
 	Create(customer *model.Customer) error
-	Get(id int) (*model.Customer, error)
-	Update(customer *model.Customer) error
 }
 
 // defaultCustomerService is a concrete implementation of CustomerService.

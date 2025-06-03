@@ -26,13 +26,3 @@ func (h *InvestmentHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *InvestmentHandler) Get(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Not implemented", http.StatusNotImplemented)
 }
-
-// Update handles investment updates
-func (h *InvestmentHandler) Update(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}
-
-// Delete handles investment deletion
-func (h *InvestmentHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}

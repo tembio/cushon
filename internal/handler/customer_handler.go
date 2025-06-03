@@ -21,18 +21,3 @@ func NewCustomerHandler(customerService service.Customer) *CustomerHandler {
 func (h *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Not implemented", http.StatusNotImplemented)
 }
-
-// Get handles retrieving a customer
-func (h *CustomerHandler) Get(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}
-
-// Update handles customer updates
-func (h *CustomerHandler) Update(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}
-
-// Delete handles customer deletion
-func (h *CustomerHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}

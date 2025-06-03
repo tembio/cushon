@@ -3,10 +3,9 @@ package middleware
 import (
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
-	"cushon/internal/app/repository"
+	"cushon/internal/repository"
 )
 
 // mockHandler is a simple http.Handler that records if it was called
@@ -20,38 +19,34 @@ func (m *mockHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestAuthMiddleware(t *testing.T) {
-	tests := []struct {
-		name        string
-		apiKey      string
-		validAPIKey bool
+	valid_key := "valid-key"
+	repo := repository.NewInMemoryAPIKeyRepository()
+	repo.AddKey(valid_key)
 
+	tests := []struct {
+		name           string
+		apiKey         string
 		expectedStatus int
 		expectedBody   string
 		shouldCallNext bool
 	}{
 		{
-			name:        "Missing API Key",
-			apiKey:      "",
-			validAPIKey: false,
-
+			name:           "Missing API Key",
+			apiKey:         "",
 			expectedStatus: http.StatusUnauthorized,
-			expectedBody:   "API key required",
+			expectedBody:   "API key required\n",
 			shouldCallNext: false,
 		},
 		{
-			name:        "Invalid API Key",
-			apiKey:      "invalid-key",
-			validAPIKey: false,
-
+			name:           "Invalid API Key",
+			apiKey:         "invalid-key",
 			expectedStatus: http.StatusForbidden,
-			expectedBody:   "Invalid API key",
+			expectedBody:   "Invalid API key\n",
 			shouldCallNext: false,
 		},
 		{
-			name:        "Valid API Key",
-			apiKey:      "valid-key",
-			validAPIKey: true,
-
+			name:           "Valid API Key",
+			apiKey:         valid_key,
 			expectedStatus: http.StatusOK,
 			expectedBody:   "",
 			shouldCallNext: true,
@@ -60,11 +55,6 @@ func TestAuthMiddleware(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := repository.NewInMemoryAPIKeyRepository()
-			if tt.validAPIKey {
-				repo.AddKey(tt.apiKey)
-			}
-
 			req := httptest.NewRequest("GET", "/", nil)
 			if tt.apiKey != "" {
 				req.Header.Set("X-API-Key", tt.apiKey)
@@ -75,13 +65,13 @@ func TestAuthMiddleware(t *testing.T) {
 			middleware := AuthMiddleware(repo, handler)
 			middleware.ServeHTTP(rr, req)
 
-			if status := rr.Code; status != tt.expectedStatus {
+			if rr.Code != tt.expectedStatus {
 				t.Errorf("handler returned wrong status code: got %v want %v",
-					status, tt.expectedStatus)
+					rr.Code, tt.expectedStatus)
 			}
 
 			// Check response body
-			body := strings.TrimSpace(rr.Body.String())
+			body := rr.Body.String()
 			if body != tt.expectedBody {
 				t.Errorf("handler returned unexpected body: got %v want %v",
 					body, tt.expectedBody)

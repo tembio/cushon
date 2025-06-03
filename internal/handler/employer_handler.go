@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"cushon/internal/app/service"
+	"cushon/internal/service"
 	"net/http"
 )
 

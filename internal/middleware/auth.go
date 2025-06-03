@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"cushon/internal/app/repository"
+	"cushon/internal/repository"
 )
 
 // AuthMiddleware is a middleware that checks for a valid API key
