@@ -1,8 +1,8 @@
 package service
 
 import (
-	"cushon/internal/app/repository"
 	"cushon/internal/model"
+	"cushon/internal/repository"
 )
 
 // Customer defines the interface for customer operations

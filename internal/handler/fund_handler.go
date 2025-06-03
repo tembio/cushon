@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"cushon/internal/app/service"
+	"cushon/internal/service"
 )
 
 // FundHandler handles fund-related HTTP requests

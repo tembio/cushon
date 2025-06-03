@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"cushon/internal/app/handler"
-	"cushon/internal/app/middleware"
-	"cushon/internal/app/repository"
-	"cushon/internal/app/service"
+	"cushon/internal/handler"
+	"cushon/internal/middleware"
+	"cushon/internal/repository"
+	"cushon/internal/service"
 
 	"github.com/gorilla/mux"
 )
