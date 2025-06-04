@@ -7,7 +7,7 @@ type Investment struct {
 	ID        uint      `json:"id"`
 	ClientID  uint      `json:"client_id"`
 	FundID    uint      `json:"fund_id"`
-	Amount    float64   `json:"amount"`
+	Amount    float32   `json:"amount"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

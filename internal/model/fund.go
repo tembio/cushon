@@ -2,7 +2,7 @@ package model
 
 // Fund represents an investment fund
 type Fund struct {
-	ID   int    `json:"id"`
+	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -13,6 +13,6 @@ type FundCreate struct {
 
 // FundResponse represents the fund data that will be sent in API responses
 type FundResponse struct {
-	ID   int    `json:"id"`
+	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }

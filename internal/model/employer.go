@@ -2,7 +2,7 @@ package model
 
 // Employer represents an employer in the system
 type Employer struct {
-	ID   int    `json:"id"`
+	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -13,6 +13,6 @@ type EmployerCreate struct {
 
 // EmployerResponse represents the employer data that will be sent in API responses
 type EmployerResponse struct {
-	ID   int    `json:"id"`
+	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }

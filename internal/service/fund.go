@@ -7,8 +7,8 @@ import (
 
 // Fund defines the interface for fund operations
 type Fund interface {
-	Create(fund *model.Fund) error
-	Get(id int) (*model.Fund, error)
+	NewFund(name string) (*model.Fund, error)
+	GetAllFunds() ([]*model.Fund, error)
 }
 
 // defaultFundService is a concrete implementation of FundService
@@ -22,11 +22,11 @@ func NewDefaultFundService(repo repository.FundRepository) *defaultFundService {
 }
 
 // Create creates a new fund
-func (s *defaultFundService) Create(fund *model.Fund) error {
-	return s.repo.CreateFund(fund)
+func (s *defaultFundService) NewFund(name string) (*model.Fund, error) {
+	return s.repo.CreateFund(name)
 }
 
-// Get retrieves a fund by its ID
-func (s *defaultFundService) Get(id int) (*model.Fund, error) {
-	return s.repo.GetFundByID(id)
+// GetAllFunds retrieves all funds
+func (s *defaultFundService) GetAllFunds() ([]*model.Fund, error) {
+	return s.repo.GetAllFunds()
 }

@@ -4,30 +4,25 @@ import (
 	"cushon/internal/model"
 )
 
-// InvestmentRepository is a mock implementation of repository.InvestmentRepository for testing
+// InvestmentRepository is a mock implementation of repository.InvestmentRepository
 type InvestmentRepository struct {
-	CreateInvestment *model.Investment
-	GetInvestment    *model.Investment
-
-	CreateErr error
-	GetErr    error
+	CreateInvestmentErr error
+	GetByIDErr          error
+	MockInvestment      *model.Investment
 }
 
-// Create implements the repository.InvestmentRepository interface
-func (m *InvestmentRepository) Create(investment *model.Investment) error {
-	if m.CreateErr != nil {
-		return m.CreateErr
+// CreateInvestment implements repository.InvestmentRepository
+func (m *InvestmentRepository) CreateInvestment(clientID, fundID uint, amount float32) (*model.Investment, error) {
+	if m.CreateInvestmentErr != nil {
+		return nil, m.CreateInvestmentErr
 	}
-	investment.ID = m.CreateInvestment.ID
-	investment.CreatedAt = m.CreateInvestment.CreatedAt
-	investment.UpdatedAt = m.CreateInvestment.UpdatedAt
-	return nil
+	return m.MockInvestment, nil
 }
 
-// GetByID implements the repository.InvestmentRepository interface
-func (m *InvestmentRepository) GetByID(id uint) (*model.Investment, error) {
-	if m.GetErr != nil {
-		return nil, m.GetErr
+// GetInvestmentByID implements repository.InvestmentRepository
+func (m *InvestmentRepository) GetInvestmentByID(id uint) (*model.Investment, error) {
+	if m.GetByIDErr != nil {
+		return nil, m.GetByIDErr
 	}
-	return m.GetInvestment, nil
+	return m.MockInvestment, nil
 }

@@ -9,58 +9,43 @@ import (
 	"cushon/internal/model"
 )
 
-func TestDefaultInvestmentService_Create(t *testing.T) {
+func TestDefaultInvestmentService_NewInvestment(t *testing.T) {
 	tests := []struct {
-		name          string
-		investment    *model.Investment
-		wantID        uint
-		repositoryErr error
-		wantErr       error
+		name             string
+		clientID         uint
+		fundID           uint
+		amount           float32
+		wantInvestmentID uint
+		repositoryErr    error
+		wantErr          error
 	}{
 		{
-			name: "Valid investment",
-			investment: &model.Investment{
-				ClientID: 1,
-				FundID:   1,
-				Amount:   1000.0,
-			},
-			wantID:        5,
-			repositoryErr: nil,
-			wantErr:       nil,
+			name:             "Valid investment",
+			clientID:         1,
+			fundID:           1,
+			amount:           1000.0,
+			wantInvestmentID: 5,
+			wantErr:          nil,
 		},
 		{
-			name:          "Nil investment",
-			investment:    nil,
-			repositoryErr: nil,
-			wantErr:       errors.New("investment cannot be nil"),
+			name:     "Zero amount",
+			clientID: 1,
+			fundID:   1,
+			amount:   0,
+			wantErr:  errors.New("investment amount must be greater than 0"),
 		},
 		{
-			name: "Zero amount",
-			investment: &model.Investment{
-				ClientID: 1,
-				FundID:   1,
-				Amount:   0,
-			},
-			repositoryErr: nil,
-			wantErr:       errors.New("investment amount must be greater than 0"),
+			name:     "Negative amount",
+			clientID: 1,
+			fundID:   1,
+			amount:   -100.0,
+			wantErr:  errors.New("investment amount must be greater than 0"),
 		},
 		{
-			name: "Negative amount",
-			investment: &model.Investment{
-				ClientID: 1,
-				FundID:   1,
-				Amount:   -100.0,
-			},
-			repositoryErr: nil,
-			wantErr:       errors.New("investment amount must be greater than 0"),
-		},
-		{
-			name: "Repository error",
-			investment: &model.Investment{
-				ClientID: 1,
-				FundID:   1,
-				Amount:   1000.0,
-			},
+			name:          "Repository error",
+			clientID:      1,
+			fundID:        1,
+			amount:        1000.0,
 			repositoryErr: errors.New("repository error"),
 			wantErr:       errors.New("repository error"),
 		},
@@ -71,14 +56,14 @@ func TestDefaultInvestmentService_Create(t *testing.T) {
 			var mockRepo *mocks.InvestmentRepository
 			now := time.Now()
 
-			if tt.investment != nil {
+			if tt.wantErr == nil || tt.repositoryErr != nil {
 				mockRepo = &mocks.InvestmentRepository{
-					CreateErr: tt.repositoryErr,
-					CreateInvestment: &model.Investment{
-						ID:        tt.wantID,
-						ClientID:  tt.investment.ClientID,
-						FundID:    tt.investment.FundID,
-						Amount:    tt.investment.Amount,
+					CreateInvestmentErr: tt.repositoryErr,
+					MockInvestment: &model.Investment{
+						ID:        tt.wantInvestmentID,
+						ClientID:  tt.clientID,
+						FundID:    tt.fundID,
+						Amount:    tt.amount,
 						CreatedAt: now,
 						UpdatedAt: now,
 					},
@@ -86,25 +71,39 @@ func TestDefaultInvestmentService_Create(t *testing.T) {
 			}
 
 			service := NewDefaultInvestmentService(mockRepo)
-			err := service.Create(tt.investment)
+			gotInvestment, err := service.NewInvestment(tt.clientID, tt.fundID, tt.amount)
 
-			if tt.wantErr != nil && err.Error() != tt.wantErr.Error() {
-				t.Errorf("got error %v, want %v", err, tt.wantErr)
+			if tt.wantErr != nil {
+				if err == nil || err.Error() != tt.wantErr.Error() {
+					t.Errorf("got error %v, want %v", err, tt.wantErr)
+				}
+				return
 			}
 
-			if tt.wantErr == nil && tt.investment != nil {
-				if tt.investment.CreatedAt.IsZero() {
-					t.Error("CreatedAt was not set")
-				}
-				if tt.investment.UpdatedAt.IsZero() {
-					t.Error("UpdatedAt was not set")
-				}
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+				return
+			}
+
+			if gotInvestment == nil {
+				t.Error("expected investment to be returned")
+				return
+			}
+
+			if gotInvestment.ClientID != tt.clientID {
+				t.Errorf("got ClientID %v, want %v", gotInvestment.ClientID, tt.clientID)
+			}
+			if gotInvestment.FundID != tt.fundID {
+				t.Errorf("got FundID %v, want %v", gotInvestment.FundID, tt.fundID)
+			}
+			if gotInvestment.Amount != tt.amount {
+				t.Errorf("got Amount %v, want %v", gotInvestment.Amount, tt.amount)
 			}
 		})
 	}
 }
 
-func TestDefaultInvestmentService_Get(t *testing.T) {
+func TestDefaultInvestmentService_GetInvestment(t *testing.T) {
 	tests := []struct {
 		name           string
 		ID             uint
@@ -133,12 +132,12 @@ func TestDefaultInvestmentService_Get(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := &mocks.InvestmentRepository{
-				GetErr:        tt.repositoryErr,
-				GetInvestment: tt.wantInvestment,
+				GetByIDErr:     tt.repositoryErr,
+				MockInvestment: tt.wantInvestment,
 			}
 
 			service := NewDefaultInvestmentService(mockRepo)
-			gotInvestment, gotErr := service.Get(tt.ID)
+			gotInvestment, gotErr := service.GetInvestment(tt.ID)
 
 			if tt.repositoryErr != nil && gotErr.Error() != tt.repositoryErr.Error() {
 				t.Errorf("got error %v, want %v", gotErr, tt.repositoryErr)

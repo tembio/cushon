@@ -1,49 +1,52 @@
 package repository
 
-import "cushon/internal/model"
+import (
+	"cushon/internal/model"
+	"errors"
+)
 
 // FundRepository defines the contract for storing and retrieving fund data.
 type FundRepository interface {
-	GetFundByID(id int) (*model.Fund, error)
-	CreateFund(fund *model.Fund) error
-	UpdateFund(fund *model.Fund) error
-	DeleteFund(id int) error
+	CreateFund(name string) (*model.Fund, error)
+	GetAllFunds() ([]*model.Fund, error)
 }
 
 // InMemoryFundRepository is a simple in-memory implementation of FundRepository for demonstration.
 type InMemoryFundRepository struct {
-	funds map[int]*model.Fund
+	funds  map[uint]*model.Fund
+	nextID uint
 }
 
 // NewInMemoryFundRepository creates a new in-memory fund repository.
 func NewInMemoryFundRepository() *InMemoryFundRepository {
 	return &InMemoryFundRepository{
-		funds: make(map[int]*model.Fund),
+		funds:  make(map[uint]*model.Fund),
+		nextID: 1,
 	}
 }
 
-// GetFundByID retrieves a fund by its ID
-func (r *InMemoryFundRepository) GetFundByID(id int) (*model.Fund, error) {
-	if fund, exists := r.funds[id]; exists {
-		return fund, nil
+// GetAllFunds retrieves all funds
+func (r *InMemoryFundRepository) GetAllFunds() ([]*model.Fund, error) {
+	funds := make([]*model.Fund, 0, len(r.funds))
+	for _, fund := range r.funds {
+		funds = append(funds, fund)
 	}
-	return nil, nil
+	return funds, nil
 }
 
 // CreateFund creates a new fund
-func (r *InMemoryFundRepository) CreateFund(fund *model.Fund) error {
-	r.funds[fund.ID] = fund
-	return nil
-}
+func (r *InMemoryFundRepository) CreateFund(name string) (*model.Fund, error) {
+	if name == "" {
+		return nil, errors.New("fund name cannot be empty")
+	}
 
-// UpdateFund updates an existing fund
-func (r *InMemoryFundRepository) UpdateFund(fund *model.Fund) error {
-	r.funds[fund.ID] = fund
-	return nil
-}
+	fund := &model.Fund{
+		ID:   r.nextID,
+		Name: name,
+	}
 
-// DeleteFund deletes a fund by its ID
-func (r *InMemoryFundRepository) DeleteFund(id int) error {
-	delete(r.funds, id)
-	return nil
+	r.funds[fund.ID] = fund
+	r.nextID++
+
+	return fund, nil
 }

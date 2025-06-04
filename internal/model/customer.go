@@ -4,9 +4,9 @@ import "time"
 
 // Customer represents a user in the system
 type Customer struct {
-	ID         int       `json:"id"`
+	ID         uint      `json:"id"`
 	Name       string    `json:"name"`
-	EmployerID *int      `json:"employer_id"`
+	EmployerID *uint     `json:"employer_id"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
@@ -14,12 +14,12 @@ type Customer struct {
 // CustomerCreate represents the data needed to create a new customer
 type CustomerCreate struct {
 	Name       string `json:"name"`
-	EmployerID *int   `json:"employer_id"`
+	EmployerID *uint  `json:"employer_id"`
 }
 
 // CustomerResponse represents the customer data that will be sent in API responses
 type CustomerResponse struct {
-	ID         int    `json:"id"`
+	ID         uint   `json:"id"`
 	Name       string `json:"name"`
-	EmployerID *int   `json:"employer_id,omitempty"`
+	EmployerID *uint  `json:"employer_id,omitempty"`
 }

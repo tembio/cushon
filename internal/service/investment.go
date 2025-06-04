@@ -8,8 +8,8 @@ import (
 
 // Investment defines the interface for investment operations
 type Investment interface {
-	Create(investment *model.Investment) error
-	Get(id string) (*model.Investment, error)
+	NewInvestment(clientID, fundID uint, amount float32) (*model.Investment, error)
+	GetInvestment(id uint) (*model.Investment, error)
 }
 
 // defaultInvestmentService is a concrete implementation of InvestmentService
@@ -23,19 +23,15 @@ func NewDefaultInvestmentService(repo repository.InvestmentRepository) *defaultI
 }
 
 // Create creates a new investment from a customer into a fund
-func (s *defaultInvestmentService) Create(investment *model.Investment) error {
-	if investment == nil {
-		return errors.New("investment cannot be nil")
+func (s *defaultInvestmentService) NewInvestment(clientID, fundID uint, amount float32) (*model.Investment, error) {
+	if amount <= 0 {
+		return nil, errors.New("investment amount must be greater than 0")
 	}
 
-	if investment.Amount <= 0 {
-		return errors.New("investment amount must be greater than 0")
-	}
-
-	return s.repo.Create(investment)
+	return s.repo.CreateInvestment(clientID, fundID, amount)
 }
 
-// Get implements the Investment interface
-func (s *defaultInvestmentService) Get(id uint) (*model.Investment, error) {
-	return s.repo.GetByID(id)
+// GetInvestment implements the Investment interface
+func (s *defaultInvestmentService) GetInvestment(id uint) (*model.Investment, error) {
+	return s.repo.GetInvestmentByID(id)
 }
