@@ -6,14 +6,14 @@ import (
 
 // CustomerRepository is a mock implementation of repository.CustomerRepository
 type CustomerRepository struct {
-	CreateCustomerErr error
-	MockCustomer      *model.Customer
+	MockCustomer *model.Customer
+	MockErr      error
 }
 
 // CreateCustomer implements repository.CustomerRepository
 func (m *CustomerRepository) CreateCustomer(customerName string, employerID *uint) (*model.Customer, error) {
-	if m.CreateCustomerErr != nil {
-		return nil, m.CreateCustomerErr
+	if m.MockErr != nil {
+		return nil, m.MockErr
 	}
 	return m.MockCustomer, nil
 }

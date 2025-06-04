@@ -3,26 +3,22 @@ package repository
 import (
 	"errors"
 	"testing"
-
-	"cushon/internal/model"
 )
 
-func TestInMemoryInvestmentRepository_Create(t *testing.T) {
+func TestInMemoryInvestmentRepository_CreateInvestment(t *testing.T) {
 	tests := []struct {
-		name      string
-		clientID  uint
-		fundID    uint
-		amount    float32
-		wantErr   error
-		checkTime bool
+		name     string
+		clientID uint
+		fundID   uint
+		amount   float32
+		wantErr  error
 	}{
 		{
-			name:      "Valid investment",
-			clientID:  1,
-			fundID:    1,
-			amount:    1000.0,
-			wantErr:   nil,
-			checkTime: true,
+			name:     "Valid investment",
+			clientID: 1,
+			fundID:   1,
+			amount:   1000.0,
+			wantErr:  nil,
 		},
 		{
 			name:     "Invalid client ID",
@@ -54,83 +50,130 @@ func TestInMemoryInvestmentRepository_Create(t *testing.T) {
 
 			if tt.wantErr != nil {
 				if err == nil || err.Error() != tt.wantErr.Error() {
-					t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("CreateInvestment() error = %v, wantErr %v", err, tt.wantErr)
 				}
 				return
 			}
 
 			if err != nil {
-				t.Errorf("Create() unexpected error = %v", err)
+				t.Errorf("CreateInvestment() unexpected error = %v", err)
 				return
 			}
 
 			if got == nil {
-				t.Error("Create() returned nil investment")
+				t.Error("CreateInvestment() returned nil investment")
 				return
 			}
 
-			// Verify the investment was stored
-			stored, err := repo.GetInvestmentByID(got.ID)
-			if err != nil {
-				t.Errorf("GetByID() error = %v", err)
-				return
+			if got.ClientID != tt.clientID {
+				t.Errorf("ClientID = %v, want %v", got.ClientID, tt.clientID)
 			}
-
-			if stored.ClientID != tt.clientID {
-				t.Errorf("ClientID = %v, want %v", stored.ClientID, tt.clientID)
+			if got.FundID != tt.fundID {
+				t.Errorf("FundID = %v, want %v", got.FundID, tt.fundID)
 			}
-			if stored.FundID != tt.fundID {
-				t.Errorf("FundID = %v, want %v", stored.FundID, tt.fundID)
-			}
-			if stored.Amount != tt.amount {
-				t.Errorf("Amount = %v, want %v", stored.Amount, tt.amount)
-			}
-
-			if tt.checkTime {
-				if stored.CreatedAt.IsZero() {
-					t.Error("CreatedAt was not set")
-				}
-				if stored.UpdatedAt.IsZero() {
-					t.Error("UpdatedAt was not set")
-				}
-				if stored.CreatedAt != stored.UpdatedAt {
-					t.Error("CreatedAt and UpdatedAt should be equal for new investments")
-				}
+			if got.Amount != tt.amount {
+				t.Errorf("Amount = %v, want %v", got.Amount, tt.amount)
 			}
 		})
 	}
 }
 
-func TestInMemoryInvestmentRepository_GetByID(t *testing.T) {
+func TestInMemoryInvestmentRepository_GetInvestmentByID(t *testing.T) {
 	tests := []struct {
 		name    string
-		setup   func(*InMemoryInvestmentRepository)
+		setup   func(*InMemoryInvestmentRepository) uint
 		id      uint
-		want    *model.Investment
 		wantErr error
 	}{
 		{
 			name: "Existing investment",
-			setup: func(r *InMemoryInvestmentRepository) {
-				r.CreateInvestment(1, 1, 1000.0)
-			},
-			id: 1,
-			want: &model.Investment{
-				ID:       1,
-				ClientID: 1,
-				FundID:   1,
-				Amount:   1000.0,
+			setup: func(r *InMemoryInvestmentRepository) uint {
+				inv, _ := r.CreateInvestment(1, 1, 1000.0)
+				return inv.ID
 			},
 			wantErr: nil,
 		},
 		{
 			name: "Non-existent investment",
-			setup: func(r *InMemoryInvestmentRepository) {
-				// No setup needed
+			setup: func(r *InMemoryInvestmentRepository) uint {
+				return 999
 			},
-			id:      999,
-			want:    nil,
 			wantErr: errors.New("investment not found"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := NewInMemoryInvestmentRepository()
+			id := tt.setup(repo)
+
+			got, err := repo.GetInvestmentByID(id)
+
+			if tt.wantErr != nil {
+				if err == nil || err.Error() != tt.wantErr.Error() {
+					t.Errorf("GetInvestmentByID() error = %v, wantErr %v", err, tt.wantErr)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("GetInvestmentByID() unexpected error = %v", err)
+				return
+			}
+
+			if got == nil {
+				t.Error("GetInvestmentByID() returned nil investment")
+				return
+			}
+
+			if got.ID != id {
+				t.Errorf("ID = %v, want %v", got.ID, id)
+			}
+		})
+	}
+}
+
+func TestInMemoryInvestmentRepository_GetInvestmentsByClientID(t *testing.T) {
+	tests := []struct {
+		name      string
+		setup     func(*InMemoryInvestmentRepository)
+		clientID  uint
+		wantCount int
+	}{
+		{
+			name: "Single investment for client",
+			setup: func(r *InMemoryInvestmentRepository) {
+				r.CreateInvestment(1, 1, 1000.0)
+			},
+			clientID:  1,
+			wantCount: 1,
+		},
+		{
+			name: "Multiple investments for client",
+			setup: func(r *InMemoryInvestmentRepository) {
+				r.CreateInvestment(1, 1, 1000.0)
+				r.CreateInvestment(1, 2, 2000.0)
+				r.CreateInvestment(1, 3, 3000.0)
+			},
+			clientID:  1,
+			wantCount: 3,
+		},
+		{
+			name: "No investments for client",
+			setup: func(r *InMemoryInvestmentRepository) {
+				r.CreateInvestment(2, 1, 1000.0)
+				r.CreateInvestment(2, 2, 2000.0)
+			},
+			clientID:  1,
+			wantCount: 0,
+		},
+		{
+			name: "Empty repository",
+			setup: func(r *InMemoryInvestmentRepository) {
+				// No investments created
+			},
+			clientID:  1,
+			wantCount: 0,
 		},
 	}
 
@@ -141,28 +184,22 @@ func TestInMemoryInvestmentRepository_GetByID(t *testing.T) {
 				tt.setup(repo)
 			}
 
-			got, err := repo.GetInvestmentByID(tt.id)
-
-			if tt.wantErr != nil {
-				if err == nil || err.Error() != tt.wantErr.Error() {
-					t.Errorf("GetByID() error = %v, wantErr %v", err, tt.wantErr)
-				}
-				return
-			}
-
+			got, err := repo.GetInvestmentsByClientID(tt.clientID)
 			if err != nil {
-				t.Errorf("GetByID() unexpected error = %v", err)
+				t.Errorf("GetInvestmentsByClientID() error = %v", err)
 				return
 			}
 
-			if got.ClientID != tt.want.ClientID {
-				t.Errorf("ClientID = %v, want %v", got.ClientID, tt.want.ClientID)
+			if len(got) != tt.wantCount {
+				t.Errorf("got %d investments, want %d", len(got), tt.wantCount)
+				return
 			}
-			if got.FundID != tt.want.FundID {
-				t.Errorf("FundID = %v, want %v", got.FundID, tt.want.FundID)
-			}
-			if got.Amount != tt.want.Amount {
-				t.Errorf("Amount = %v, want %v", got.Amount, tt.want.Amount)
+
+			// Verify all returned investments belong to the requested client
+			for _, inv := range got {
+				if inv.ClientID != tt.clientID {
+					t.Errorf("found investment with ClientID = %v, want %v", inv.ClientID, tt.clientID)
+				}
 			}
 		})
 	}

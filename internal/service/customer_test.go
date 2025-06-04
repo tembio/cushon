@@ -49,8 +49,8 @@ func TestDefaultCustomerService_NewRetailCustomer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := &mocks.CustomerRepository{
-				CreateCustomerErr: tt.mockErr,
-				MockCustomer:      tt.mockCustomer,
+				MockErr:      tt.mockErr,
+				MockCustomer: tt.mockCustomer,
 			}
 
 			service := NewDefaultCustomerService(mockRepo)
@@ -128,8 +128,8 @@ func TestDefaultCustomerService_NewEmployedCustomer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := &mocks.CustomerRepository{
-				CreateCustomerErr: tt.mockErr,
-				MockCustomer:      tt.mockCustomer,
+				MockErr:      tt.mockErr,
+				MockCustomer: tt.mockCustomer,
 			}
 
 			service := NewDefaultCustomerService(mockRepo)

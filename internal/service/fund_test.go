@@ -44,8 +44,8 @@ func TestDefaultFundService_NewFund(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := &mocks.FundRepository{
-				CreateFundErr: tt.repositoryErr,
-				MockFund:      tt.wantFund,
+				MockErr:  tt.repositoryErr,
+				MockFund: tt.wantFund,
 			}
 
 			service := NewDefaultFundService(mockRepo)
@@ -115,7 +115,7 @@ func TestDefaultFundService_GetAllFunds(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := &mocks.FundRepository{
-				GetAllErr: tt.repositoryErr,
+				MockErr:   tt.repositoryErr,
 				MockFunds: tt.wantFunds,
 			}
 

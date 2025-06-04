@@ -283,3 +283,132 @@ func TestInvestmentHandler_Get(t *testing.T) {
 		})
 	}
 }
+
+func TestInvestmentHandler_GetAll(t *testing.T) {
+	tests := []struct {
+		name            string
+		clientID        string
+		mockInvestments []*model.Investment
+		mockErr         error
+		expectedStatus  int
+		expectedBody    []model.InvestmentResponse
+		expectedError   string
+	}{
+		{
+			name:     "Get investments successfully",
+			clientID: "1",
+			mockInvestments: []*model.Investment{
+				{
+					ID:       1,
+					ClientID: 1,
+					FundID:   1,
+					Amount:   1000.0,
+				},
+				{
+					ID:       2,
+					ClientID: 1,
+					FundID:   2,
+					Amount:   2000.0,
+				},
+			},
+			mockErr:        nil,
+			expectedStatus: http.StatusOK,
+			expectedBody: []model.InvestmentResponse{
+				{
+					ID:       1,
+					ClientID: 1,
+					FundID:   1,
+					Amount:   1000.0,
+				},
+				{
+					ID:       2,
+					ClientID: 1,
+					FundID:   2,
+					Amount:   2000.0,
+				},
+			},
+			expectedError: "",
+		},
+		{
+			name:            "No investments found",
+			clientID:        "1",
+			mockInvestments: []*model.Investment{},
+			mockErr:         nil,
+			expectedStatus:  http.StatusOK,
+			expectedBody:    []model.InvestmentResponse{},
+			expectedError:   "",
+		},
+		{
+			name:            "Invalid client ID",
+			clientID:        "invalid",
+			mockInvestments: nil,
+			mockErr:         nil,
+			expectedStatus:  http.StatusBadRequest,
+			expectedBody:    nil,
+			expectedError:   "Invalid client ID",
+		},
+		{
+			name:            "Service error",
+			clientID:        "1",
+			mockInvestments: nil,
+			mockErr:         errors.New("service error"),
+			expectedStatus:  http.StatusInternalServerError,
+			expectedBody:    nil,
+			expectedError:   "service error",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockService := &mocks.InvestmentService{
+				MockInvestments: tt.mockInvestments,
+				MockErr:         tt.mockErr,
+			}
+
+			handler := NewInvestmentHandler(mockService)
+
+			req := httptest.NewRequest("GET", "/investments?client_id="+tt.clientID, nil)
+			rr := httptest.NewRecorder()
+
+			handler.GetAll(rr, req)
+
+			if rr.Code != tt.expectedStatus {
+				t.Errorf("handler returned wrong status code: got %v want %v",
+					rr.Code, tt.expectedStatus)
+			}
+
+			if tt.expectedStatus == http.StatusOK {
+				var response []model.InvestmentResponse
+				if err := json.NewDecoder(rr.Body).Decode(&response); err != nil {
+					t.Fatalf("Could not decode response: %v", err)
+				}
+
+				if len(response) != len(tt.expectedBody) {
+					t.Errorf("handler returned wrong number of investments: got %v want %v",
+						len(response), len(tt.expectedBody))
+					return
+				}
+
+				for i, expected := range tt.expectedBody {
+					if response[i].ID != expected.ID {
+						t.Errorf("investment[%d].ID = %v, want %v", i, response[i].ID, expected.ID)
+					}
+					if response[i].ClientID != expected.ClientID {
+						t.Errorf("investment[%d].ClientID = %v, want %v", i, response[i].ClientID, expected.ClientID)
+					}
+					if response[i].FundID != expected.FundID {
+						t.Errorf("investment[%d].FundID = %v, want %v", i, response[i].FundID, expected.FundID)
+					}
+					if response[i].Amount != expected.Amount {
+						t.Errorf("investment[%d].Amount = %v, want %v", i, response[i].Amount, expected.Amount)
+					}
+				}
+			} else if tt.expectedError != "" {
+				if rr.Body.String() != tt.expectedError+"\n" {
+					t.Errorf("handler returned wrong error message: got %v want %v",
+						rr.Body.String(), tt.expectedError)
+				}
+			}
+		})
+	}
+}

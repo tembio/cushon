@@ -6,14 +6,14 @@ import (
 
 // EmployerRepository is a mock implementation of repository.EmployerRepository
 type EmployerRepository struct {
-	CreateEmployerErr error
-	MockEmployer      *model.Employer
+	MockEmployer *model.Employer
+	MockErr      error
 }
 
 // CreateEmployer implements repository.EmployerRepository
 func (m *EmployerRepository) CreateEmployer(name string) (*model.Employer, error) {
-	if m.CreateEmployerErr != nil {
-		return nil, m.CreateEmployerErr
+	if m.MockErr != nil {
+		return nil, m.MockErr
 	}
 	return m.MockEmployer, nil
 }

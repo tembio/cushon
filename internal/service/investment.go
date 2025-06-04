@@ -10,6 +10,7 @@ import (
 type Investment interface {
 	NewInvestment(clientID, fundID uint, amount float32) (*model.Investment, error)
 	GetInvestment(id uint) (*model.Investment, error)
+	GetInvestmentsByClientID(clientID uint) ([]*model.Investment, error)
 }
 
 // defaultInvestmentService is a concrete implementation of InvestmentService
@@ -34,4 +35,9 @@ func (s *defaultInvestmentService) NewInvestment(clientID, fundID uint, amount f
 // GetInvestment implements the Investment interface
 func (s *defaultInvestmentService) GetInvestment(id uint) (*model.Investment, error) {
 	return s.repo.GetInvestmentByID(id)
+}
+
+// GetInvestmentsByClientID implements the Investment interface
+func (s *defaultInvestmentService) GetInvestmentsByClientID(clientID uint) ([]*model.Investment, error) {
+	return s.repo.GetInvestmentsByClientID(clientID)
 }

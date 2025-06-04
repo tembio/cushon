@@ -6,24 +6,23 @@ import (
 
 // FundRepository is a mock implementation of repository.FundRepository
 type FundRepository struct {
-	CreateFundErr error
-	GetAllErr     error
-	MockFunds     []*model.Fund
-	MockFund      *model.Fund
+	MockFunds []*model.Fund
+	MockFund  *model.Fund
+	MockErr   error
 }
 
 // CreateFund implements repository.FundRepository
 func (m *FundRepository) CreateFund(name string) (*model.Fund, error) {
-	if m.CreateFundErr != nil {
-		return nil, m.CreateFundErr
+	if m.MockErr != nil {
+		return nil, m.MockErr
 	}
 	return m.MockFund, nil
 }
 
 // GetAllFunds implements repository.FundRepository
 func (m *FundRepository) GetAllFunds() ([]*model.Fund, error) {
-	if m.GetAllErr != nil {
-		return nil, m.GetAllErr
+	if m.MockErr != nil {
+		return nil, m.MockErr
 	}
 	return m.MockFunds, nil
 }

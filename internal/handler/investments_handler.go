@@ -90,3 +90,38 @@ func (h *InvestmentHandler) Get(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
+
+// GetAll handles retrieving investments by client ID
+func (h *InvestmentHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	clientIDStr := r.URL.Query().Get("client_id")
+	if clientIDStr == "" {
+		http.Error(w, "client_id query parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	clientID, err := strconv.ParseUint(clientIDStr, 10, 32)
+	if err != nil {
+		http.Error(w, "Invalid client ID", http.StatusBadRequest)
+		return
+	}
+
+	investments, err := h.investmentService.GetInvestmentsByClientID(uint(clientID))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := make([]model.InvestmentResponse, len(investments))
+	for i, investment := range investments {
+		response[i] = model.InvestmentResponse{
+			ID:       investment.ID,
+			ClientID: investment.ClientID,
+			FundID:   investment.FundID,
+			Amount:   float64(investment.Amount),
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}

@@ -58,7 +58,7 @@ func TestDefaultInvestmentService_NewInvestment(t *testing.T) {
 
 			if tt.wantErr == nil || tt.repositoryErr != nil {
 				mockRepo = &mocks.InvestmentRepository{
-					CreateInvestmentErr: tt.repositoryErr,
+					MockErr: tt.repositoryErr,
 					MockInvestment: &model.Investment{
 						ID:        tt.wantInvestmentID,
 						ClientID:  tt.clientID,
@@ -132,7 +132,7 @@ func TestDefaultInvestmentService_GetInvestment(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := &mocks.InvestmentRepository{
-				GetByIDErr:     tt.repositoryErr,
+				MockErr:        tt.repositoryErr,
 				MockInvestment: tt.wantInvestment,
 			}
 
@@ -146,6 +146,98 @@ func TestDefaultInvestmentService_GetInvestment(t *testing.T) {
 			if tt.repositoryErr == nil && tt.wantInvestment != nil {
 				if tt.wantInvestment.ID != gotInvestment.ID {
 					t.Errorf("Incorrect investment retrieved, got %v, want %v", gotInvestment, tt.wantInvestment)
+				}
+			}
+		})
+	}
+}
+
+func TestDefaultInvestmentService_GetInvestmentsByClientID(t *testing.T) {
+	tests := []struct {
+		name            string
+		clientID        uint
+		wantInvestments []*model.Investment
+		repositoryErr   error
+	}{
+		{
+			name:     "Single investment",
+			clientID: 1,
+			wantInvestments: []*model.Investment{
+				{
+					ID:       1,
+					ClientID: 1,
+					FundID:   1,
+					Amount:   1000.0,
+				},
+			},
+			repositoryErr: nil,
+		},
+		{
+			name:     "Multiple investments",
+			clientID: 1,
+			wantInvestments: []*model.Investment{
+				{
+					ID:       1,
+					ClientID: 1,
+					FundID:   1,
+					Amount:   1000.0,
+				},
+				{
+					ID:       2,
+					ClientID: 1,
+					FundID:   2,
+					Amount:   2000.0,
+				},
+			},
+			repositoryErr: nil,
+		},
+		{
+			name:            "No investments",
+			clientID:        1,
+			wantInvestments: []*model.Investment{},
+			repositoryErr:   nil,
+		},
+		{
+			name:            "Repository error",
+			clientID:        1,
+			wantInvestments: nil,
+			repositoryErr:   errors.New("repository error"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockRepo := &mocks.InvestmentRepository{
+				MockErr:         tt.repositoryErr,
+				MockInvestments: tt.wantInvestments,
+			}
+
+			service := NewDefaultInvestmentService(mockRepo)
+			gotInvestments, gotErr := service.GetInvestmentsByClientID(tt.clientID)
+
+			if tt.repositoryErr != nil && gotErr.Error() != tt.repositoryErr.Error() {
+				t.Errorf("got error %v, want %v", gotErr, tt.repositoryErr)
+			}
+
+			if tt.repositoryErr == nil {
+				if len(gotInvestments) != len(tt.wantInvestments) {
+					t.Errorf("got %d investments, want %d", len(gotInvestments), len(tt.wantInvestments))
+					return
+				}
+
+				for i, want := range tt.wantInvestments {
+					if gotInvestments[i].ID != want.ID {
+						t.Errorf("investment[%d].ID = %v, want %v", i, gotInvestments[i].ID, want.ID)
+					}
+					if gotInvestments[i].ClientID != want.ClientID {
+						t.Errorf("investment[%d].ClientID = %v, want %v", i, gotInvestments[i].ClientID, want.ClientID)
+					}
+					if gotInvestments[i].FundID != want.FundID {
+						t.Errorf("investment[%d].FundID = %v, want %v", i, gotInvestments[i].FundID, want.FundID)
+					}
+					if gotInvestments[i].Amount != want.Amount {
+						t.Errorf("investment[%d].Amount = %v, want %v", i, gotInvestments[i].Amount, want.Amount)
+					}
 				}
 			}
 		})

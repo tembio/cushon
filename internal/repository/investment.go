@@ -10,6 +10,7 @@ import (
 type InvestmentRepository interface {
 	CreateInvestment(clientID, fundID uint, amount float32) (*model.Investment, error)
 	GetInvestmentByID(id uint) (*model.Investment, error)
+	GetInvestmentsByClientID(clientID uint) ([]*model.Investment, error)
 }
 
 // InMemoryInvestmentRepository is a simple in-memory implementation of InvestmentRepository
@@ -60,4 +61,15 @@ func (r *InMemoryInvestmentRepository) GetInvestmentByID(id uint) (*model.Invest
 		return nil, errors.New("investment not found")
 	}
 	return investment, nil
+}
+
+// GetInvestmentsByClientID retrieves all investments for a specific client
+func (r *InMemoryInvestmentRepository) GetInvestmentsByClientID(clientID uint) ([]*model.Investment, error) {
+	investments := make([]*model.Investment, 0)
+	for _, investment := range r.investments {
+		if investment.ClientID == clientID {
+			investments = append(investments, investment)
+		}
+	}
+	return investments, nil
 }
