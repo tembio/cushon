@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"cushon/internal/model"
 	"cushon/internal/service"
+	"encoding/json"
 	"net/http"
 )
 
@@ -19,20 +21,24 @@ func NewEmployerHandler(employerService service.Employer) *EmployerHandler {
 
 // Create handles employer creation
 func (h *EmployerHandler) Create(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}
+	var createRequest model.EmployerCreate
+	if err := json.NewDecoder(r.Body).Decode(&createRequest); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
 
-// Get handles retrieving an employer
-func (h *EmployerHandler) Get(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}
+	employer, err := h.employerService.NewEmployer(createRequest.Name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-// Update handles employer updates
-func (h *EmployerHandler) Update(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
-}
+	response := model.EmployerResponse{
+		ID:   employer.ID,
+		Name: employer.Name,
+	}
 
-// Delete handles employer deletion
-func (h *EmployerHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "Not implemented", http.StatusNotImplemented)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
 }
