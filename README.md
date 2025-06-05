@@ -36,6 +36,29 @@ In the case of the repositories, I've implemented in-memory repositories that st
 
 I've also implemented mocks for all the interfaces I had to use in unit tests.
 
+
+For example the **employer** repository defines the interface:
+```go
+type EmployerRepository interface {
+	CreateEmployer(name string) (*model.Employer, error)
+}
+```
+That is implemented by a **real implementation**
+```go
+type InMemoryEmployerRepository struct {
+	employers map[uint]*model.Employer
+	nextID    uint
+}
+```
+And also a **mock**
+
+```go
+type EmployerRepository struct {
+	MockEmployer *model.Employer
+	MockErr      error
+}
+```
+
 ## Project Structure
 
 ```
@@ -75,30 +98,12 @@ I've also implemented mocks for all the interfaces I had to use in unit tests.
     ├── fund_service.go
     └── investment_service.go
 ```
-Each entity (customer, fund, investment, employer) has a model, service, repository and handler.
-The interfaces are defined in the same file as the implementation because I wanted to avoid creating more files, and making the structure more complicated.
 
-For example the **employer** repository defines the interface:
-```go
-type EmployerRepository interface {
-	CreateEmployer(name string) (*model.Employer, error)
-}
-```
-That is implemented by a **real implementation**
-```go
-type InMemoryEmployerRepository struct {
-	employers map[uint]*model.Employer
-	nextID    uint
-}
-```
-And also a **mock**
+There is a `certs` folder for the certificates used for TLS since the server uses HTTPS. I'm including them in the repo just for simplicity, but I'm aware 
+this is not safe.
 
-```go
-type EmployerRepository struct {
-	MockEmployer *model.Employer
-	MockErr      error
-}
-```
+The `scripts` folder contains scripts to run end to end tests that call the API endpoints using a Python client. Instructions to run these can be found in the `How to Run` section.
+
 
 ## Authentication
 
