@@ -18,6 +18,9 @@ Another option would've been to create one microservice to handle each entity, i
 
 The statement of the task was very open ended, so I had to make a choice between focusing more on the code (what I've done, having a solution that runs) or focusing on system design (just providing a document with the design of my solution).
 
+I still had to cut corners, like not using a DB or using unsafe practices (certificates, api keys...), but I've tried to explain what I would've done in a real scenario across the document.
+
+
 ## Implementation Details
 
 I've structured the code the following way:
@@ -33,9 +36,10 @@ Services and repositories provide an interface so that different versions can be
 For example, different services that implement the same interface can use the same data for use cases that are slightly different, and we could swap the service without having to make big changes to the handlers.
 
 In the case of the repositories, I've implemented in-memory repositories that store the data in memory, but they could be replaced with a Postgres implementation, for example.
+(I would choose a relation database like Postgres, due to the nature of the problem and the data. I can image we would want complex queries making different relation between entities. Also we have to guarantee strong data consistency because we are working with sensitive information. 
+So I think an ACID database makes more sense in this context.)
 
 I've also implemented mocks for all the interfaces I had to use in unit tests.
-
 
 For example the **employer** repository defines the interface:
 ```go
