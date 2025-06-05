@@ -57,3 +57,6 @@ class APIClient:
     def create_employer(self, name: str) -> Dict[str, Any]:
         data = {"name": name}
         return self.make_request("POST", "/employers", data) 
+    
+    def get_investments_by_client(self, client_id: int) -> Dict[str, Any]:
+        return self.make_request("GET", f"/investments?client_id={client_id}")
